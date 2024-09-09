@@ -10,6 +10,25 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Add Sister</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/add_sister.css') }}">
+        <script>
+            // Function to add new interest input fields
+            function addInterest() {
+                const interestsDiv = document.getElementById("interests-container");
+                const newInterest = document.createElement("div");
+                newInterest.classList.add("form-group");
+                newInterest.innerHTML = '<input type="text" name="interests" placeholder="Enter interest">';
+                interestsDiv.appendChild(newInterest);
+            }
+
+            // Function to add new teach/help input fields
+            function addTeachHelp() {
+                const teachHelpDiv = document.getElementById("teach-help-container");
+                const newTeachHelp = document.createElement("div");
+                newTeachHelp.classList.add("form-group");
+                newTeachHelp.innerHTML = '<input type="text" name="teach_help" placeholder="Enter teach/help">';
+                teachHelpDiv.appendChild(newTeachHelp);
+            }
+        </script>
     </head>
     <body>
         <div class="form-container">
@@ -41,13 +60,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="interests">Interests (comma-separated):</label>
-                    <input type="text" id="interests" name="interests">
+                    <label for="interests">Interests:</label>
+                    <div id="interests-container">
+                        <input type="text" name="interests" placeholder="Enter interest">
+                    </div>
+                    <button type="button" onclick="addInterest()">Add Interest</button>
                 </div>
 
                 <div class="form-group">
                     <label for="teach_help">What can you teach or need help with:</label>
-                    <input type="text" id="teach_help" name="teach_help">
+                    <div id="teach-help-container">
+                        <input type="text" name="teach_help" placeholder="Enter teach/help">
+                    </div>
+                    <button type="button" onclick="addTeachHelp()">Add Teach/Help</button>
                 </div>
 
                 <div class="form-group">

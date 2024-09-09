@@ -112,11 +112,43 @@ def complete_new_password():
         return jsonify({"error": str(e)}), 500
 
 
-# Apply the login_required decorator to all routes except index
-@app.route("/add_client")
-@login_required
+@app.route("/clients", methods=["GET"])
 def clients():
-    return render_template("add_client.html")
+    # Fetch all sisters from DynamoDB
+    response = table.scan()  # Use `scan` to retrieve all items
+    sisters = response["Items"]
+
+    # Filter by sister type and location if provided in query params
+    sister_type = request.args.get("sister_type")
+    location = request.args.get("location")
+    sort_by = request.args.get("sort_by")
+    order = request.args.get("order", "asc")
+
+    # Filter by sister type (Big Sister / Little Sister)
+    if sister_type:
+        if sister_type == "Big Sister":
+            sisters = [s for s in sisters if "BigSister" in s["Role"]]
+        elif sister_type == "Little Sister":
+            sisters = [s for s in sisters if "LittleSister" in s["Role"]]
+
+    # Filter by location
+    if location:
+        sisters = [s for s in sisters if location.lower() in s["Location"].lower()]
+
+    # Sort the sisters if 'sort_by' parameter is passed
+    if sort_by:
+        reverse = True if order == "desc" else False
+        sisters = sorted(sisters, key=lambda s: s.get(sort_by), reverse=reverse)
+
+    # Render the page with the filtered/sorted data
+    return render_template(
+        "clients.html",
+        sisters=sisters,
+        sister_type=sister_type,
+        location=location,
+        sort_by=sort_by,
+        order=order,
+    )
 
 
 @app.route("/add_sister", methods=["GET", "POST"])
@@ -127,10 +159,10 @@ def add_sister():
         role = request.form["role"]
         age = int(request.form["age"])
         location = request.form["location"]
-        interests = (
-            request.form["interests"].split(",") if request.form["interests"] else []
-        )
-        teach_help = request.form["teach_help"]
+        interests = request.form.getlist("interests")
+        teach_help = request.form.getlist("teach_help")
+        print(interests)
+        print(teach_help)
 
         # Generate a unique ID for the sister
         sister_id = str(uuid.uuid4())  # UUID to ensure unique IDs
@@ -153,14 +185,15 @@ def add_sister():
             "Interests": interests,
             "TeachHelp": teach_help,
         }
+        print(item)
 
         # Insert item into the DynamoDB table
         table.put_item(Item=item)
 
         flash("Sister successfully added!", "success")
-        return redirect(url_for("add_sister"))
+        return redirect(url_for("home"))
 
-    return render_template("clients.html")
+    return render_template("add_client.html")
 
 
 @app.route("/match_creation_tool")
