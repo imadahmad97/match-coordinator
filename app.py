@@ -1,4 +1,14 @@
-from flask import Flask, request, redirect, url_for, session, jsonify, render_template
+from flask import (
+    Flask,
+    request,
+    redirect,
+    url_for,
+    session,
+    jsonify,
+    render_template,
+    flash,
+)
+from functools import wraps
 import boto3
 import logging
 
@@ -6,6 +16,21 @@ app = Flask(__name__)
 app.config.from_object("config.Config")
 
 cognito = boto3.client("cognito-idp", region_name=app.config["COGNITO_REGION"])
+
+# Ensure a secret key for Flask sessions
+app.secret_key = app.config["SECRET_KEY"]
+
+
+# Custom decorator to check if user is logged in
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "access_token" not in session:
+            flash("Please log in to access this page.", "warning")
+            return redirect(url_for("index"))
+        return f(*args, **kwargs)
+
+    return decorated_function
 
 
 @app.route("/")
@@ -34,7 +59,6 @@ def login():
 
         # Check if 'NEW_PASSWORD_REQUIRED' challenge is present
         if response.get("ChallengeName") == "NEW_PASSWORD_REQUIRED":
-            # Store the session and username to complete the challenge later
             session["cognito_session"] = response["Session"]
             session["username"] = username
             # Render a form to ask the user for a new password
@@ -43,7 +67,9 @@ def login():
         # If authentication is successful, process the IdToken
         if "AuthenticationResult" in response:
             access_token = response["AuthenticationResult"]["IdToken"]
-            return render_template("post_login.html", token=access_token)
+            # Store the access token in session to indicate a logged-in user
+            session["access_token"] = access_token
+            return render_template("home.html", token=access_token)
         else:
             return jsonify({"error": "Login failed. No authentication result."}), 401
 
@@ -74,9 +100,36 @@ def complete_new_password():
         # Check if the challenge was completed and authentication succeeded
         if "AuthenticationResult" in response:
             access_token = response["AuthenticationResult"]["IdToken"]
-            return render_template("post_login.html", token=access_token)
+            session["access_token"] = access_token
+            return render_template("home.html", token=access_token)
         else:
             return jsonify({"error": "Failed to complete new password challenge."}), 401
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# Apply the login_required decorator to all routes except index
+@app.route("/clients")
+@login_required
+def clients():
+    return render_template("clients.html")
+
+
+@app.route("/match_creation_tool")
+@login_required
+def match_creation_tool():
+    return render_template("match_creation_tool.html")
+
+
+@app.route("/home")
+@login_required
+def home():
+    return render_template("home.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()  # Clear the session data on logout
+    flash("You have been logged out.", "success")
+    return redirect(url_for("index"))
