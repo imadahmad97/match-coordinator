@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Flask App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='header.css') }}">
+</head>
+<body>
+
+    <!-- Reusable Header -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="post_login.html">Home</a></li>
+                <li><a href="clients.html">Clients</a></li>
+                <li><a href="match_creation_tool.html">Match Creation Tool</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div>
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>
