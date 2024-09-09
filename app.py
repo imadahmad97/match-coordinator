@@ -10,13 +10,16 @@ from flask import (
 )
 from functools import wraps
 import boto3
-import logging
+from boto3.dynamodb.conditions import Key
+import uuid
+
 
 app = Flask(__name__)
 app.config.from_object("config.Config")
 
 cognito = boto3.client("cognito-idp", region_name=app.config["COGNITO_REGION"])
-
+dynamodb = boto3.resource("dynamodb")
+table = dynamodb.Table("sisters")
 # Ensure a secret key for Flask sessions
 app.secret_key = app.config["SECRET_KEY"]
 
@@ -110,9 +113,53 @@ def complete_new_password():
 
 
 # Apply the login_required decorator to all routes except index
-@app.route("/clients")
+@app.route("/add_client")
 @login_required
 def clients():
+    return render_template("add_client.html")
+
+
+@app.route("/add_sister", methods=["GET", "POST"])
+def add_sister():
+    if request.method == "POST":
+        # Get data from the form
+        name = request.form["name"]
+        role = request.form["role"]
+        age = int(request.form["age"])
+        location = request.form["location"]
+        interests = (
+            request.form["interests"].split(",") if request.form["interests"] else []
+        )
+        teach_help = request.form["teach_help"]
+
+        # Generate a unique ID for the sister
+        sister_id = str(uuid.uuid4())  # UUID to ensure unique IDs
+
+        # Determine the partition key based on role (Big Sister / Little Sister)
+        if role.lower() == "big sister":
+            partition_key = f"Sister#BigSister{sister_id}"
+            sort_key = "Role#BigSister"
+        else:
+            partition_key = f"Sister#LittleSister{sister_id}"
+            sort_key = "Role#LittleSister"
+
+        # Create item to insert into DynamoDB
+        item = {
+            "SisterID": partition_key,
+            "Role": sort_key,
+            "Name": name,
+            "Age": age,
+            "Location": location,
+            "Interests": interests,
+            "TeachHelp": teach_help,
+        }
+
+        # Insert item into the DynamoDB table
+        table.put_item(Item=item)
+
+        flash("Sister successfully added!", "success")
+        return redirect(url_for("add_sister"))
+
     return render_template("clients.html")
 
 
