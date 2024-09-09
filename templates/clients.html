@@ -12,19 +12,29 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/clients.css') }}">
     <script>
         function sortTable(column) {
-            // Get the current order from the column header
-            let currentOrder = document.getElementById(column).dataset.order;
-            let newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
-
-            // Update the URL with the new sort_by and order
-            let query = new URLSearchParams(window.location.search);
-            query.set('sort_by', column);
-            query.set('order', newOrder);
-
-            // Navigate to the updated URL with sorting parameters
-            window.location.href = '?' + query.toString();
+            const th = document.getElementById(column);
+            const order = th.getAttribute('data-order');
+            const newOrder = order === 'asc' ? 'desc' : 'asc';
+            th.setAttribute('data-order', newOrder);
+        
+            const table = th.closest('table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+            rows.sort((a, b) => {
+                const aText = a.querySelector(`td:nth-child(${th.cellIndex + 1})`).textContent.trim();
+                const bText = b.querySelector(`td:nth-child(${th.cellIndex + 1})`).textContent.trim();
+        
+                if (newOrder === 'asc') {
+                    return aText.localeCompare(bText);
+                } else {
+                    return bText.localeCompare(aText);
+                }
+            });
+        
+            rows.forEach(row => tbody.appendChild(row));
         }
-    </script>
+        </script>
 </head>
 <body>
     <h1>Sisters List</h1>
@@ -48,12 +58,12 @@
     <table border="1">
         <thead>
             <tr>
-                <th id="Name" data-order="{{ 'asc' if sort_by != 'Name' or order == 'desc' else 'desc' }}" onclick="sortTable('Name')">Name</th>
-                <th id="Role" data-order="{{ 'asc' if sort_by != 'Role' or order == 'desc' else 'desc' }}" onclick="sortTable('Role')">Role</th>
-                <th id="Age" data-order="{{ 'asc' if sort_by != 'Age' or order == 'desc' else 'desc' }}" onclick="sortTable('Age')">Age</th>
-                <th id="Location" data-order="{{ 'asc' if sort_by != 'Location' or order == 'desc' else 'desc' }}" onclick="sortTable('Location')">Location</th>
-                <th id="Interests" data-order="{{ 'asc' if sort_by != 'Interests' or order == 'desc' else 'desc' }}" onclick="sortTable('Interests')">Interests</th>
-                <th id="TeachHelp" data-order="{{ 'asc' if sort_by != 'TeachHelp' or order == 'desc' else 'desc' }}" onclick="sortTable('TeachHelp')">Teach/Help</th>
+                <th id="Name" data-order="{{ 'desc' if sort_by == 'Name' and order == 'asc' else 'asc' }}" onclick="sortTable('Name')">Name</th>
+<th id="Role" data-order="{{ 'desc' if sort_by == 'Role' and order == 'asc' else 'asc' }}" onclick="sortTable('Role')">Role</th>
+<th id="Age" data-order="{{ 'desc' if sort_by == 'Age' and order == 'asc' else 'asc' }}" onclick="sortTable('Age')">Age</th>
+<th id="Location" data-order="{{ 'desc' if sort_by == 'Location' and order == 'asc' else 'asc' }}" onclick="sortTable('Location')">Location</th>
+<th id="Interests" data-order="{{ 'desc' if sort_by == 'Interests' and order == 'asc' else 'asc' }}" onclick="sortTable('Interests')">Interests</th>
+<th id="TeachHelp" data-order="{{ 'desc' if sort_by == 'TeachHelp' and order == 'asc' else 'asc' }}" onclick="sortTable('TeachHelp')">Teach/Help</th>
             </tr>
         </thead>
         <tbody>
