@@ -9,32 +9,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clients - Sisters List</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/clients.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='clients.css') }}">
     <script>
         function sortTable(column) {
             const th = document.getElementById(column);
             const order = th.getAttribute('data-order');
             const newOrder = order === 'asc' ? 'desc' : 'asc';
             th.setAttribute('data-order', newOrder);
-        
+
             const table = th.closest('table');
             const tbody = table.querySelector('tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
-        
+
             rows.sort((a, b) => {
                 const aText = a.querySelector(`td:nth-child(${th.cellIndex + 1})`).textContent.trim();
                 const bText = b.querySelector(`td:nth-child(${th.cellIndex + 1})`).textContent.trim();
-        
+
                 if (newOrder === 'asc') {
                     return aText.localeCompare(bText);
                 } else {
                     return bText.localeCompare(aText);
                 }
             });
-        
+
             rows.forEach(row => tbody.appendChild(row));
         }
-        </script>
+    </script>
 </head>
 <body>
     <h1>Sisters List</h1>
@@ -55,7 +55,7 @@
     </form>
 
     <!-- Sisters Table -->
-    <table border="1">
+    <table class="sisters-table">
         <thead>
             <tr>
                 <th id="Name" data-order="{{ 'desc' if sort_by == 'Name' and order == 'asc' else 'asc' }}" onclick="sortTable('Name')">Name</th>
@@ -65,6 +65,8 @@
                 <th id="Location" data-order="{{ 'desc' if sort_by == 'Location' and order == 'asc' else 'asc' }}" onclick="sortTable('Location')">Location</th>
                 <th id="Interests" data-order="{{ 'desc' if sort_by == 'Interests' and order == 'asc' else 'asc' }}" onclick="sortTable('Interests')">Interests</th>
                 <th id="TeachHelp" data-order="{{ 'desc' if sort_by == 'TeachHelp' and order == 'asc' else 'asc' }}" onclick="sortTable('TeachHelp')">Teach/Help</th>
+                <th id="edit_sister">Edit</th>
+                <th id="potential_matches">See Potential Matches</th>
             </tr>
         </thead>
         <tbody>
@@ -78,7 +80,10 @@
                 <td>{{ sister['Interests'] | join(', ') }}</td>
                 <td>{{ sister['TeachHelp'] | join(', ') }}</td>
                 <td>
-                    <a href="{{ url_for('edit_sister', sister_id=sister['SisterID']) }}">Edit</a>
+                    <a href="{{ url_for('edit_sister', sister_id=sister['SisterID']) }}"><button class="button-1" role="button">Edit</button></a>
+                </td>
+                <td>
+                    <a href="{{ url_for('edit_sister', sister_id=sister['SisterID']) }}"><button class="button-1" role="button">See Potential Matches</button></a>
                 </td>
             </tr>
             {% endfor %}
