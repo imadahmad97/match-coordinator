@@ -16,7 +16,8 @@
                 const interestsDiv = document.getElementById("interests-container");
                 const newInterest = document.createElement("div");
                 newInterest.classList.add("form-group");
-                newInterest.innerHTML = '<input type="text" name="interests" placeholder="Enter interest">';
+                newInterest.innerHTML = '<input type="text" name="interests" placeholder="Enter interest">' +
+                                        '<button type="button" onclick="removeField(this)">Remove</button>';
                 interestsDiv.appendChild(newInterest);
             }
 
@@ -25,8 +26,15 @@
                 const teachHelpDiv = document.getElementById("teach-help-container");
                 const newTeachHelp = document.createElement("div");
                 newTeachHelp.classList.add("form-group");
-                newTeachHelp.innerHTML = '<input type="text" name="teach_help" placeholder="Enter teach/help">';
+                newTeachHelp.innerHTML = '<input type="text" name="teach_help" placeholder="Enter teach/help">' +
+                                         '<button type="button" onclick="removeField(this)">Remove</button>';
                 teachHelpDiv.appendChild(newTeachHelp);
+            }
+
+            // Function to remove a field
+            function removeField(button) {
+                const fieldGroup = button.parentElement;
+                fieldGroup.remove();
             }
         </script>
     </head>
@@ -77,10 +85,16 @@
                     <div id="interests-container">
                         {% if sister and sister['Interests'] %}
                             {% for interest in sister['Interests'] %}
-                                <input type="text" name="interests" value="{{ interest }}">
+                                <div class="form-group">
+                                    <input type="text" name="interests" value="{{ interest }}">
+                                    <button type="button" onclick="removeField(this)">Remove</button>
+                                </div>
                             {% endfor %}
                         {% else %}
-                            <input type="text" name="interests" placeholder="Enter interest">
+                            <div class="form-group">
+                                <input type="text" name="interests" placeholder="Enter interest">
+                                <button type="button" onclick="removeField(this)">Remove</button>
+                            </div>
                         {% endif %}
                     </div>
                     <button type="button" onclick="addInterest()">Add Interest</button>
@@ -92,10 +106,16 @@
                     <div id="teach-help-container">
                         {% if sister and sister['TeachHelp'] %}
                             {% for teach in sister['TeachHelp'] %}
-                                <input type="text" name="teach_help" value="{{ teach }}">
+                                <div class="form-group">
+                                    <input type="text" name="teach_help" value="{{ teach }}">
+                                    <button type="button" onclick="removeField(this)">Remove</button>
+                                </div>
                             {% endfor %}
                         {% else %}
-                            <input type="text" name="teach_help" placeholder="Enter teach/help">
+                            <div class="form-group">
+                                <input type="text" name="teach_help" placeholder="Enter teach/help">
+                                <button type="button" onclick="removeField(this)">Remove</button>
+                            </div>
                         {% endif %}
                     </div>
                     <button type="button" onclick="addTeachHelp()">Add Teach/Help</button>
