@@ -1,6 +1,6 @@
 {% extends 'header.html' %}
 
-{% block title %}Home - My Flask App{% endblock %}
+{% block title %}{{ 'Edit Sister' if sister else 'Add Sister' }} - My Flask App{% endblock %}
 
 {% block content %}
     <!DOCTYPE html>
@@ -8,7 +8,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Add Sister</title>
+        <title>{{ 'Edit Sister' if sister else 'Add Sister' }}</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/add_sister.css') }}">
         <script>
             // Function to add new interest input fields
@@ -32,51 +32,78 @@
     </head>
     <body>
         <div class="form-container">
-            <h1>Add a Big Sister or Little Sister</h1>
+            <h1>{{ 'Edit a Big Sister or Little Sister' if sister else 'Add a Big Sister or Little Sister' }}</h1>
 
-            <form action="/add_sister" method="POST">
+            <!-- Form action: if editing, go to the edit_sister route; otherwise go to the add_sister route -->
+            <form action="{{ url_for('edit_sister', sister_id=sister['SisterID']) if sister else url_for('add_sister') }}" method="POST">
+                
+                <!-- Name field -->
                 <div class="form-group">
                     <label for="name">Name:</label>
-                    <input type="text" id="name" name="name" required>
+                    <input type="text" id="name" name="name" value="{{ sister['Name'] if sister else '' }}" required>
                 </div>
 
+                <!-- Role field (Big Sister / Little Sister) -->
                 <div class="form-group">
                     <label for="role">Role:</label>
                     <select id="role" name="role" required>
-                        <option value="" disabled selected>Select a role</option>
-                        <option value="Big Sister">Big Sister</option>
-                        <option value="Little Sister">Little Sister</option>
+                        <option value="" disabled {% if not sister %}selected{% endif %}>Select a role</option>
+                        <option value="Big Sister" {% if sister and 'BigSister' in sister['Role'] %}selected{% endif %}>Big Sister</option>
+                        <option value="Little Sister" {% if sister and 'LittleSister' in sister['Role'] %}selected{% endif %}>Little Sister</option>
                     </select>
                 </div>
 
+                <!-- Age field -->
                 <div class="form-group">
                     <label for="age">Age:</label>
-                    <input type="number" id="age" name="age" required>
+                    <input type="number" id="age" name="age" value="{{ sister['Age'] if sister else '' }}" required>
                 </div>
 
+                <!-- Times Matched Previously -->
+                <div class="form-group">
+                    <label for="times_matched">Times Matched Previously:</label>
+                    <input type="number" id="times_matched" name="times_matched" value="{{ sister['TimesMatched'] if sister else '' }}" required>
+                </div>
+
+                <!-- Location field -->
                 <div class="form-group">
                     <label for="location">Location:</label>
-                    <input type="text" id="location" name="location" required>
+                    <input type="text" id="location" name="location" value="{{ sister['Location'] if sister else '' }}" required>
                 </div>
 
+                <!-- Interests field -->
                 <div class="form-group">
                     <label for="interests">Interests:</label>
                     <div id="interests-container">
-                        <input type="text" name="interests" placeholder="Enter interest">
+                        {% if sister and sister['Interests'] %}
+                            {% for interest in sister['Interests'] %}
+                                <input type="text" name="interests" value="{{ interest }}">
+                            {% endfor %}
+                        {% else %}
+                            <input type="text" name="interests" placeholder="Enter interest">
+                        {% endif %}
                     </div>
                     <button type="button" onclick="addInterest()">Add Interest</button>
                 </div>
 
+                <!-- Teach/Help field -->
                 <div class="form-group">
                     <label for="teach_help">What can you teach or need help with:</label>
                     <div id="teach-help-container">
-                        <input type="text" name="teach_help" placeholder="Enter teach/help">
+                        {% if sister and sister['TeachHelp'] %}
+                            {% for teach in sister['TeachHelp'] %}
+                                <input type="text" name="teach_help" value="{{ teach }}">
+                            {% endfor %}
+                        {% else %}
+                            <input type="text" name="teach_help" placeholder="Enter teach/help">
+                        {% endif %}
                     </div>
                     <button type="button" onclick="addTeachHelp()">Add Teach/Help</button>
                 </div>
 
+                <!-- Submit button -->
                 <div class="form-group">
-                    <button type="submit">Submit</button>
+                    <button type="submit">{{ 'Update' if sister else 'Submit' }}</button>
                 </div>
             </form>
         </div>

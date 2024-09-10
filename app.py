@@ -154,46 +154,71 @@ def clients():
 @app.route("/add_sister", methods=["GET", "POST"])
 def add_sister():
     if request.method == "POST":
-        # Get data from the form
+        # This route is only for adding new sisters
         name = request.form["name"]
         role = request.form["role"]
         age = int(request.form["age"])
+        times_matched = int(request.form["times_matched"])
         location = request.form["location"]
         interests = request.form.getlist("interests")
         teach_help = request.form.getlist("teach_help")
-        print(interests)
-        print(teach_help)
 
         # Generate a unique ID for the sister
         sister_id = str(uuid.uuid4())  # UUID to ensure unique IDs
 
-        # Determine the partition key based on role (Big Sister / Little Sister)
-        if role.lower() == "big sister":
-            partition_key = f"Sister#BigSister{sister_id}"
-            sort_key = "Role#BigSister"
-        else:
-            partition_key = f"Sister#LittleSister{sister_id}"
-            sort_key = "Role#LittleSister"
-
-        # Create item to insert into DynamoDB
+        # Create the item
         item = {
-            "SisterID": partition_key,
-            "Role": sort_key,
+            "SisterID": sister_id,
+            "Role": role,
             "Name": name,
             "Age": age,
+            "TimesMatched": times_matched,
             "Location": location,
             "Interests": interests,
             "TeachHelp": teach_help,
         }
-        print(item)
 
-        # Insert item into the DynamoDB table
         table.put_item(Item=item)
-
         flash("Sister successfully added!", "success")
-        return redirect(url_for("home"))
+        return redirect(url_for("clients"))
 
     return render_template("add_client.html")
+
+
+@app.route("/edit_sister/<sister_id>", methods=["GET", "POST"])
+def edit_sister(sister_id):
+    # Fetch the sister's details from DynamoDB
+    response = table.get_item(Key={"SisterID": sister_id})
+    sister = response.get("Item")
+
+    if request.method == "POST":
+        # Get updated data from the form
+        name = request.form["name"]
+        role = request.form["role"]
+        age = int(request.form["age"])
+        times_matched = int(request.form["times_matched"])
+        location = request.form["location"]
+        interests = request.form.getlist("interests")
+        teach_help = request.form.getlist("teach_help")
+
+        # Update the item in DynamoDB
+        item = {
+            "SisterID": sister_id,
+            "Role": role,
+            "Name": name,
+            "Age": age,
+            "TimesMatched": times_matched,
+            "Location": location,
+            "Interests": interests,
+            "TeachHelp": teach_help,
+        }
+
+        table.put_item(Item=item)
+        flash("Sister details updated successfully!", "success")
+        return redirect(url_for("clients"))
+
+    # Render the edit form with existing details pre-filled
+    return render_template("add_client.html", sister=sister)
 
 
 @app.route("/match_creation_tool")

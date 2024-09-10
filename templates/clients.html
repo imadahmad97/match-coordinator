@@ -59,22 +59,27 @@
         <thead>
             <tr>
                 <th id="Name" data-order="{{ 'desc' if sort_by == 'Name' and order == 'asc' else 'asc' }}" onclick="sortTable('Name')">Name</th>
-<th id="Role" data-order="{{ 'desc' if sort_by == 'Role' and order == 'asc' else 'asc' }}" onclick="sortTable('Role')">Role</th>
-<th id="Age" data-order="{{ 'desc' if sort_by == 'Age' and order == 'asc' else 'asc' }}" onclick="sortTable('Age')">Age</th>
-<th id="Location" data-order="{{ 'desc' if sort_by == 'Location' and order == 'asc' else 'asc' }}" onclick="sortTable('Location')">Location</th>
-<th id="Interests" data-order="{{ 'desc' if sort_by == 'Interests' and order == 'asc' else 'asc' }}" onclick="sortTable('Interests')">Interests</th>
-<th id="TeachHelp" data-order="{{ 'desc' if sort_by == 'TeachHelp' and order == 'asc' else 'asc' }}" onclick="sortTable('TeachHelp')">Teach/Help</th>
+                <th id="times_matched" data-order="{{ 'desc' if sort_by == 'times_matched' and order == 'asc' else 'asc' }}" onclick="sortTable('times_matched')">Times Matched</th>
+                <th id="Role" data-order="{{ 'desc' if sort_by == 'Role' and order == 'asc' else 'asc' }}" onclick="sortTable('Role')">Role</th>
+                <th id="Age" data-order="{{ 'desc' if sort_by == 'Age' and order == 'asc' else 'asc' }}" onclick="sortTable('Age')">Age</th>
+                <th id="Location" data-order="{{ 'desc' if sort_by == 'Location' and order == 'asc' else 'asc' }}" onclick="sortTable('Location')">Location</th>
+                <th id="Interests" data-order="{{ 'desc' if sort_by == 'Interests' and order == 'asc' else 'asc' }}" onclick="sortTable('Interests')">Interests</th>
+                <th id="TeachHelp" data-order="{{ 'desc' if sort_by == 'TeachHelp' and order == 'asc' else 'asc' }}" onclick="sortTable('TeachHelp')">Teach/Help</th>
             </tr>
         </thead>
         <tbody>
             {% for sister in sisters %}
             <tr>
                 <td>{{ sister['Name'] }}</td>
+                <td>{{ sister['TimesMatched'] }}</td>
                 <td>{{ 'Big Sister' if 'BigSister' in sister['Role'] else 'Little Sister' }}</td>
                 <td>{{ sister['Age'] }}</td>
                 <td>{{ sister['Location'] }}</td>
                 <td>{{ sister['Interests'] | join(', ') }}</td>
                 <td>{{ sister['TeachHelp'] | join(', ') }}</td>
+                <td>
+                    <a href="{{ url_for('edit_sister', sister_id=sister['SisterID']) }}">Edit</a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
