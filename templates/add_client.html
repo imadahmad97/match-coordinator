@@ -10,7 +10,28 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{{ 'Edit Sister' if sister else 'Add Sister' }}</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='sisters.css') }}">
+
         <script>
+            // Function to dynamically change label based on selected role
+            function updateTeachHelpLabel() {
+                const role = document.getElementById('role').value;
+                const teachHelpLabel = document.getElementById('teach-help-label');
+
+                if (role === 'Big Sister') {
+                    teachHelpLabel.textContent = 'Can Teach/Help With:';
+                } else if (role === 'Little Sister') {
+                    teachHelpLabel.textContent = 'What Do You Need Help With:';
+                }
+
+                // Show the rest of the form after selecting the role
+                document.getElementById('form-details').style.display = 'block';
+            }
+
+            // Function to hide form details initially
+            function hideFormDetails() {
+                document.getElementById('form-details').style.display = 'none';
+            }
+
             // Function to add new interest input fields
             function addInterest() {
                 const interestsDiv = document.getElementById("interests-container");
@@ -36,29 +57,40 @@
                 const fieldGroup = button.parentElement;
                 fieldGroup.remove();
             }
+
+            // Automatically hide the form details when the page loads
+            window.onload = function() {
+                hideFormDetails();
+                {% if sister %}
+                    document.getElementById('role').value = '{{ "Big Sister" if "BigSister" in sister["Role"] else "Little Sister" }}';
+                    updateTeachHelpLabel();
+                {% endif %}
+            
+            };
+
+            
         </script>
     </head>
     <body>
         <div class="form-container">
             <h1>{{ 'Edit a Big Sister or Little Sister' if sister else 'Add a Big Sister or Little Sister' }}</h1>
 
-            <!-- Form action: if editing, go to the edit_sister route; otherwise go to the add_sister route -->
-            <form action="{{ url_for('edit_sister', sister_id=sister['SisterID']) if sister else url_for('add_sister') }}" method="POST">
-                
+            <!-- Role field (Big Sister / Little Sister) -->
+            <div class="form-group">
+                <label for="role">Role:</label>
+                <select id="role" name="role" required onchange="updateTeachHelpLabel()">
+                    <option value="" disabled {% if not sister %}selected{% endif %}>Select a role</option>
+                    <option value="Big Sister" {% if sister and 'BigSister' in sister['Role'] %}selected{% endif %}>Big Sister</option>
+                    <option value="Little Sister" {% if sister and 'LittleSister' in sister['Role'] %}selected{% endif %}>Little Sister</option>
+                </select>
+            </div>
+
+            <!-- The rest of the form should be hidden until the role is selected -->
+            <div id="form-details">
                 <!-- Name field -->
                 <div class="form-group">
                     <label for="name">Name:</label>
                     <input type="text" id="name" name="name" value="{{ sister['Name'] if sister else '' }}" required>
-                </div>
-
-                <!-- Role field (Big Sister / Little Sister) -->
-                <div class="form-group">
-                    <label for="role">Role:</label>
-                    <select id="role" name="role" required>
-                        <option value="" disabled {% if not sister %}selected{% endif %}>Select a role</option>
-                        <option value="Big Sister" {% if sister and 'BigSister' in sister['Role'] %}selected{% endif %}>Big Sister</option>
-                        <option value="Little Sister" {% if sister and 'LittleSister' in sister['Role'] %}selected{% endif %}>Little Sister</option>
-                    </select>
                 </div>
 
                 <!-- Age field -->
@@ -100,9 +132,9 @@
                     <button type="button" onclick="addInterest()">Add Interest</button>
                 </div>
 
-                <!-- Teach/Help field -->
+                <!-- Teach/Help field (dynamically labeled based on role) -->
                 <div class="form-group">
-                    <label for="teach_help">What can you teach or need help with:</label>
+                    <label for="teach_help" id="teach-help-label">What can you teach or need help with:</label>
                     <div id="teach-help-container">
                         {% if sister and sister['TeachHelp'] %}
                             {% for teach in sister['TeachHelp'] %}
@@ -125,7 +157,7 @@
                 <div class="form-group">
                     <button type="submit">{{ 'Update' if sister else 'Submit' }}</button>
                 </div>
-            </form>
+            </div>
         </div>
     </body>
     </html>

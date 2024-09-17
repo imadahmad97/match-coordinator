@@ -12,10 +12,10 @@
     <header>
         <nav>
             <ul>
-                <li><a href="home">Home</a></li>
-                <li><a href="add_sister">Add New Sister</a></li>
-                <li><a href="clients">View All Sisters</a></li>
-                <li><a href="match_creation_tool">Match Creation Tool</a></li>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('add_sister')}}">Add New Sister</a></li>
+                <li><a href="{{ url_for ('clients')}}">View All Sisters</a></li>
+                <li><a href="{{ url_for ('match_creation_tool')}}">Match Creation Tool</a></li>
             </ul>
         </nav>
     </header>

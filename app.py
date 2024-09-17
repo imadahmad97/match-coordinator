@@ -36,9 +36,28 @@ def login_required(f):
     return decorated_function
 
 
+def find_potential_matches(sister_id):
+    sister = table.get_item(Key={"SisterID": sister_id})
+    item = sister["Item"]
+    role = item["Role"].split("#")[1]
+    sister_id = item["SisterID"].split("#")[1]
+    interests = item["Interests"]
+    location = item["Location"]
+    teach_help = item["TeachHelp"]
+    age = int(item["Age"])
+    name = item["Name"]
+    print(role)
+    print(interests)
+    print(location)
+    print(teach_help)
+    print(age)
+    print(name)
+
+
 @app.route("/")
 def index():
     # Render the index.html template (your login form)
+    # find_potential_matches("Sister#LittleSister9df4ddec-8f1c-4565-9edc-01d00da283d4")
     return render_template("index.html")
 
 
@@ -149,6 +168,17 @@ def clients():
         sort_by=sort_by,
         order=order,
     )
+
+
+@app.route("/see_matches/<int:sister_id>", methods=["GET"])
+def see_matches(sister_id):
+    sister = get_sister_by_id(sister_id)
+
+    # Get potential matches based on criteria (e.g., location, interests, etc.)
+    matches = find_potential_matches(sister)
+
+    # Render a page showing potential matches for the given sister
+    return render_template("matches.html", sister=sister, matches=matches)
 
 
 @app.route("/add_sister", methods=["GET", "POST"])
